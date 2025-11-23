@@ -3,18 +3,18 @@ import axios from "axios";
 import { Modal } from "bootstrap";
 
 export default function DataSiswa() {
-    const [search, setSearch] = useState("");
-    const [dataSiswa, setDataSiswa] = useState([]);
-    const [filteredDataSiswa, setFilteredDataSiswa] = useState([]);
+  const [search, setSearch] = useState("");
+  const [dataSiswa, setDataSiswa] = useState([]);
+  const [filteredDataSiswa, setFilteredDataSiswa] = useState([]);
 
-    const [idEdit, setIdEdit] = useState(null);
-    const [kodeSiswa, setKodeSiswa] = useState("");
-    const [namaSiswa, setNamaSiswa] = useState("");
-    const [alamat, setAlamat] = useState("");
-    const [tglSiswa, setTglSiswa] = useState("");
-    const [jurusan, setJurusan] = useState("");
+  const [idEdit, setIdEdit] = useState(null);
+  const [kodeSiswa, setKodeSiswa] = useState("");
+  const [namaSiswa, setNamaSiswa] = useState("");
+  const [alamat, setAlamat] = useState("");
+  const [tglSiswa, setTglSiswa] = useState("");
+  const [jurusan, setJurusan] = useState("");
 
-    const fetchData = () => {
+  const fetchData = () => {
     axios
       .get(`http://localhost:3000/data-siswa`)
       .then((response) => {
@@ -59,8 +59,16 @@ export default function DataSiswa() {
     setKodeSiswa(data.kode_siswa);
     setNamaSiswa(data.nama_siswa);
     setAlamat(data.alamat);
-    setTglSiswa(data.tgl_siswa);
-    setJurusan(data.jurusan); 
+    // Convert tgl_siswa ke format yyyy-mm-dd
+    if (data.tgl_siswa) {
+        const date = new Date(data.tgl_siswa);
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const dd = String(date.getDate()).padStart(2, "0");
+        setTglSiswa(`${yyyy}-${mm}-${dd}`);
+    } else {
+        setTglSiswa("");
+    }
 
     const modal = Modal.getOrCreateInstance("#modalDataSiswa");
     modal.show();
@@ -73,7 +81,7 @@ export default function DataSiswa() {
       kode_siswa: kodeSiswa,
       nama_siswa: namaSiswa,
       alamat: alamat,
-      tgl_siswa: tglSiswa,
+      tgl_siswa: tglSiswa ? tglSiswa : null,
       jurusan: jurusan,
     };
 
@@ -101,7 +109,7 @@ export default function DataSiswa() {
       .catch((err) => console.error("Gagal menghapus!", err));
   };
 
-  return(
+  return (
     <div className="container mt-4">
       <h3>Data Siswa</h3>
 
@@ -144,7 +152,13 @@ export default function DataSiswa() {
                 <td>{item.kode_siswa}</td>
                 <td>{item.nama_siswa}</td>
                 <td>{item.alamat}</td>
-                <td>{new Date(item.tgl_siswa).toISOString().split("T")[0]}</td>
+                <td>
+                  {new Date(item.tgl_siswa).toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </td>
                 <td>{item.jurusan}</td>
                 <td>
                   <button
@@ -191,7 +205,7 @@ export default function DataSiswa() {
               <div className="modal-body">
                 <div className="form-floating mb-2">
                   <input
-                  name="kode_siswa"
+                    name="kode_siswa"
                     className="form-control"
                     placeholder="Kode Siswa"
                     value={kodeSiswa}
@@ -203,7 +217,7 @@ export default function DataSiswa() {
 
                 <div className="form-floating mb-2">
                   <input
-                  name="nama_siswa"
+                    name="nama_siswa"
                     className="form-control"
                     placeholder="Nama Siswa"
                     value={namaSiswa}
@@ -215,7 +229,7 @@ export default function DataSiswa() {
 
                 <div className="form-floating mb-2">
                   <input
-                  name="alamat"
+                    name="alamat"
                     className="form-control"
                     placeholder="alamat"
                     value={alamat}
@@ -227,8 +241,8 @@ export default function DataSiswa() {
 
                 <div className="form-floating mb-2">
                   <input
-                  name="tgl_siswa"
-                  type="date"
+                    name="tgl_siswa"
+                    type="date"
                     className="form-control"
                     placeholder="Tanggal Siswa"
                     value={tglSiswa}
@@ -240,7 +254,7 @@ export default function DataSiswa() {
 
                 <div className="form-floating mb-2">
                   <input
-                  name="jurusan"
+                    name="jurusan"
                     className="form-control"
                     placeholder="Jurusan"
                     value={jurusan}
@@ -249,7 +263,7 @@ export default function DataSiswa() {
                   />
                   <label>Jurusan</label>
                 </div>
-                </div>
+              </div>
 
               <div className="modal-footer">
                 <button type="submit" className="btn btn-primary">
@@ -261,6 +275,5 @@ export default function DataSiswa() {
         </div>
       </div>
     </div>
-  )
-
+  );
 }
